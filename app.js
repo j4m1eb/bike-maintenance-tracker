@@ -39,6 +39,10 @@ const elements = {
   activityList: document.querySelector("#activity-list"),
   importedBikeList: document.querySelector("#imported-bike-list"),
   importSelectedBikes: document.querySelector("#import-selected-bikes"),
+  quickNewChain: document.querySelector("#quick-new-chain"),
+  quickWaxChain: document.querySelector("#quick-wax-chain"),
+  showBikeTab: document.querySelector("#show-bike-tab"),
+  showWheelsetTab: document.querySelector("#show-wheelset-tab"),
   editorShell: document.querySelector("#editor-shell"),
   editorBackdrop: document.querySelector("#editor-backdrop"),
   closeEditor: document.querySelector("#close-editor"),
@@ -180,7 +184,7 @@ function parseState(raw) {
 }
 
 function defaultOnboarding() {
-  return { stravaConnected: false, showManualSetup: false, importedKeys: [] };
+  return { stravaConnected: false, showManualSetup: false, importedKeys: [], setupTab: "bike" };
 }
 
 function persist() {
@@ -197,6 +201,10 @@ function bindEvents() {
   elements.closeEditor.addEventListener("click", closeEditor);
   elements.bikeEditForm.addEventListener("submit", onBikeEditSubmit);
   elements.wheelsetEditForm.addEventListener("submit", onWheelsetEditSubmit);
+  elements.quickNewChain.addEventListener("click", () => quickServiceAction("newChain"));
+  elements.quickWaxChain.addEventListener("click", () => quickServiceAction("wax"));
+  elements.showBikeTab.addEventListener("click", () => setSetupTab("bike"));
+  elements.showWheelsetTab.addEventListener("click", () => setSetupTab("wheelset"));
   elements.connectStrava.addEventListener("click", onConnectStrava);
   elements.importSelectedBikes.addEventListener("click", importSelectedStravaBikes);
   elements.showManualSetup.addEventListener("click", () => {
@@ -267,6 +275,9 @@ function onServiceSubmit(event) {
     bike.distance += distance;
     wheelset.distance += distance;
     bike.activeWheelsetId = wheelset.id;
+  } else if (type === "newChain") {
+    bike.maintenance.wax.distanceAtService = bike.distance;
+    bike.maintenance.wax.date = today();
   } else if (WHEELSET_ACTIONS.has(type)) {
     wheelset.maintenance[type].distanceAtService = wheelset.distance;
     wheelset.maintenance[type].date = today();
@@ -304,6 +315,10 @@ function renderOnboarding() {
   const hasBikes = state.bikes.length > 0;
   elements.onboardingSection.classList.toggle("hidden", hasBikes && !state.onboarding.stravaConnected);
   elements.manualSetupPanel.classList.toggle("hidden", !state.onboarding.showManualSetup && !hasBikes);
+  elements.showBikeTab.classList.toggle("is-active", state.onboarding.setupTab !== "wheelset");
+  elements.showWheelsetTab.classList.toggle("is-active", state.onboarding.setupTab === "wheelset");
+  elements.bikeForm.classList.toggle("hidden", state.onboarding.setupTab === "wheelset");
+  elements.wheelsetForm.classList.toggle("hidden", state.onboarding.setupTab !== "wheelset");
   elements.stravaStatus.textContent = state.onboarding.stravaConnected ? "Strava connected (stub)" : "Strava not connected";
   elements.importSelectedBikes.disabled = !state.onboarding.stravaConnected;
 
@@ -353,6 +368,8 @@ function renderPriority() {
   dueItems.slice(0, 6).forEach((item) => {
     const article = document.createElement("article");
     article.className = "priority-item";
+    if (item.status === "Due now") article.classList.add("is-due-now");
+    if (item.status === "Due soon") article.classList.add("is-due-soon");
     article.innerHTML = `
       <p class="priority-title">${item.title}</p>
       <p class="priority-copy">${item.context}</p>
@@ -398,7 +415,7 @@ function renderBikes() {
     });
 
     const wheelsetList = fragment.querySelector(".wheelset-list");
-    bike.wheelsets.forEach((wheelset) => {
+    orderedWheelsets(bike).forEach((wheelset) => {
       const wheelsetFragment = templates.wheelset.content.cloneNode(true);
       wheelsetFragment.querySelector(".wheelset-name").textContent = wheelset.name;
       wheelsetFragment.querySelector(".wheelset-meta").textContent =
@@ -912,6 +929,20 @@ function getWheelset(bike, id) {
   return bike.wheelsets.find((wheelset) => wheelset.id === id);
 }
 
+function orderedWheelsets(bike) {
+  return [...bike.wheelsets].sort((a, b) => {
+    if (a.id === bike.activeWheelsetId) return -1;
+    if (b.id === bike.activeWheelsetId) return 1;
+    return 0;
+  });
+}
+
+function setSetupTab(tab) {
+  state.onboarding.setupTab = tab;
+  persist();
+  render();
+}
+
 function openBikeEditor(bike) {
   elements.editorEyebrow.textContent = "Edit bike";
   elements.editorTitle.textContent = bike.name;
@@ -1052,6 +1083,7 @@ function activityLabel(type) {
     wheelset: "Wheelset added",
     ride: "Ride added",
     wax: "Chain waxed",
+    newChain: "New chain fitted",
     chainring: "Chainrings replaced",
     cassette: "Cassette replaced",
     frontBrakePads: "Front brake pads replaced",
@@ -1062,6 +1094,27 @@ function activityLabel(type) {
     rearSealant: "Rear sealant refreshed"
   };
   return labels[type] || "Updated";
+}
+
+function quickServiceAction(type) {
+  const bike = getBike(elements.serviceBikeSelect.value) || state.bikes[0];
+  if (!bike) {
+    alert("Add or import a bike first.");
+    return;
+  }
+
+  if (type === "newChain") {
+    bike.maintenance.wax.distanceAtService = bike.distance;
+    bike.maintenance.wax.date = today();
+    state.activity.unshift(activityRecord(bike, null, "newChain", 0, "New chain fitted"));
+  } else if (type === "wax") {
+    bike.maintenance.wax.distanceAtService = bike.distance;
+    bike.maintenance.wax.date = today();
+    state.activity.unshift(activityRecord(bike, null, "wax", 0, "Chain waxed"));
+  }
+
+  persist();
+  render();
 }
 
 function toggleValue(list, value, enabled) {

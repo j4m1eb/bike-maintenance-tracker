@@ -57,24 +57,61 @@
 
     <main class="layout">
       <section class="content-column">
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Today</p>
-              <h2>Maintenance dashboard</h2>
+        <section class="dashboard-shell">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Today</p>
+                <h2>Maintenance dashboard</h2>
+              </div>
             </div>
-          </div>
-          <div class="stats-grid" id="stats-grid"></div>
-          <div class="priority-grid">
-            <article class="priority-card">
-              <p class="subsection-title">Needs attention</p>
-              <div id="priority-list"></div>
-            </article>
-            <article class="priority-card">
-              <p class="subsection-title">Active setups</p>
-              <div id="active-setups"></div>
-            </article>
-          </div>
+            <div class="stats-grid" id="stats-grid"></div>
+            <div class="priority-grid">
+              <article class="priority-card">
+                <p class="subsection-title">Needs attention</p>
+                <div id="priority-list"></div>
+              </article>
+              <article class="priority-card">
+                <p class="subsection-title">Active setups</p>
+                <div id="active-setups"></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="panel service-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Manage</p>
+                <h2>Log service</h2>
+              </div>
+            </div>
+            <div class="quick-button-row">
+              <button class="ghost-button" id="quick-new-chain" type="button">New chain fitted</button>
+              <button class="ghost-button" id="quick-wax-chain" type="button">Chain waxed</button>
+            </div>
+            <form id="service-form" class="stack-form">
+              <label>Bike<select name="bikeId" id="service-bike-select" required></select></label>
+              <label>Action
+                <select name="type" id="service-type-select">
+                  <option value="wax">Waxed chain</option>
+                  <option value="newChain">New chain fitted</option>
+                  <option value="chainring">Replaced chainrings</option>
+                  <option value="cassette">Replaced cassette</option>
+                  <option value="frontBrakePads">Replaced front brake pads</option>
+                  <option value="rearBrakePads">Replaced rear brake pads</option>
+                  <option value="frontTyre">Replaced front tyre</option>
+                  <option value="rearTyre">Replaced rear tyre</option>
+                  <option value="frontSealant">Refreshed front sealant</option>
+                  <option value="rearSealant">Refreshed rear sealant</option>
+                  <option value="ride">Added ride distance</option>
+                </select>
+              </label>
+              <label id="service-wheelset-label">Wheelset<select name="wheelsetId" id="service-wheelset-select"></select></label>
+              <label>Distance<input name="distance" type="number" min="0" step="1" value="0" required></label>
+              <label>Notes<textarea name="notes" rows="3" placeholder="Silca hot wax, rear tyre replaced, sealant top-up..."></textarea></label>
+              <button class="primary-button" type="submit">Save event</button>
+            </form>
+          </section>
         </section>
 
         <section class="panel">
@@ -89,12 +126,51 @@
       </section>
 
       <aside class="sidebar">
+        <section class="panel hidden">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Manage</p>
+              <h2>Quick actions</h2>
+            </div>
+          </div>
+          <div class="quick-button-row">
+            <button class="ghost-button" id="quick-new-chain" type="button">New chain fitted</button>
+            <button class="ghost-button" id="quick-wax-chain" type="button">Chain waxed</button>
+          </div>
+          <form id="service-form" class="stack-form">
+            <label>Bike<select name="bikeId" id="service-bike-select" required></select></label>
+            <label>Action
+              <select name="type" id="service-type-select">
+                <option value="wax">Waxed chain</option>
+                <option value="newChain">New chain fitted</option>
+                <option value="chainring">Replaced chainrings</option>
+                <option value="cassette">Replaced cassette</option>
+                <option value="frontBrakePads">Replaced front brake pads</option>
+                <option value="rearBrakePads">Replaced rear brake pads</option>
+                <option value="frontTyre">Replaced front tyre</option>
+                <option value="rearTyre">Replaced rear tyre</option>
+                <option value="frontSealant">Refreshed front sealant</option>
+                <option value="rearSealant">Refreshed rear sealant</option>
+                <option value="ride">Added ride distance</option>
+              </select>
+            </label>
+            <label id="service-wheelset-label">Wheelset<select name="wheelsetId" id="service-wheelset-select"></select></label>
+            <label>Distance<input name="distance" type="number" min="0" step="1" value="0" required></label>
+            <label>Notes<textarea name="notes" rows="3" placeholder="Silca hot wax, rear tyre replaced, sealant top-up..."></textarea></label>
+            <button class="primary-button" type="submit">Save event</button>
+          </form>
+        </section>
+
         <section class="panel" id="manual-setup-panel">
           <div class="panel-header">
             <div>
               <p class="eyebrow">Manage</p>
-              <h2>Add bike</h2>
+              <h2>Setup</h2>
             </div>
+          </div>
+          <div class="segmented-control" role="tablist" aria-label="Setup tabs">
+            <button class="segment is-active" id="show-bike-tab" type="button">Add bike</button>
+            <button class="segment" id="show-wheelset-tab" type="button">Add wheelset</button>
           </div>
           <form id="bike-form" class="stack-form">
             <label>Bike name<input name="name" type="text" placeholder="Dogma Road" required></label>
@@ -128,14 +204,7 @@
           </form>
         </section>
 
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Manage</p>
-              <h2>Add wheelset</h2>
-            </div>
-          </div>
-          <form id="wheelset-form" class="stack-form">
+          <form id="wheelset-form" class="stack-form hidden">
             <label>Bike<select name="bikeId" id="wheelset-bike-select" required></select></label>
             <label>Wheelset name<input name="name" type="text" placeholder="65mm deep wheels" required></label>
             <label>Notes<input name="notes" type="text" placeholder="Race day setup, 28 mm tyres"></label>
@@ -150,37 +219,6 @@
             <label>Rear sealant interval (months)<input name="rearSealantInterval" type="number" min="1" step="1" value="4" required></label>
             <button class="primary-button" type="submit">Save wheelset</button>
           </form>
-        </section>
-
-        <section class="panel">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Manage</p>
-              <h2>Log service</h2>
-            </div>
-          </div>
-          <form id="service-form" class="stack-form">
-            <label>Bike<select name="bikeId" id="service-bike-select" required></select></label>
-            <label>Action
-              <select name="type" id="service-type-select">
-                <option value="wax">Waxed chain</option>
-                <option value="chainring">Replaced chainrings</option>
-                <option value="cassette">Replaced cassette</option>
-                <option value="frontBrakePads">Replaced front brake pads</option>
-                <option value="rearBrakePads">Replaced rear brake pads</option>
-                <option value="frontTyre">Replaced front tyre</option>
-                <option value="rearTyre">Replaced rear tyre</option>
-                <option value="frontSealant">Refreshed front sealant</option>
-                <option value="rearSealant">Refreshed rear sealant</option>
-                <option value="ride">Added ride distance</option>
-              </select>
-            </label>
-            <label id="service-wheelset-label">Wheelset<select name="wheelsetId" id="service-wheelset-select"></select></label>
-            <label>Distance<input name="distance" type="number" min="0" step="1" value="0" required></label>
-            <label>Notes<textarea name="notes" rows="3" placeholder="Silca hot wax, rear tyre replaced, sealant top-up..."></textarea></label>
-            <button class="primary-button" type="submit">Save event</button>
-          </form>
-        </section>
 
         <section class="panel">
           <div class="panel-header">
@@ -270,6 +308,7 @@
           <p class="bike-meta"></p>
         </div>
         <div class="inline-actions">
+          <button class="ghost-button new-chain" type="button">New chain fitted</button>
           <button class="ghost-button edit-bike" type="button">Edit</button>
           <button class="danger-link delete-bike" type="button">Delete</button>
         </div>
