@@ -516,6 +516,10 @@ label,
   background: rgba(255, 251, 246, 0.88);
 }
 
+.bike-meter-stack .meter-card {
+  background: linear-gradient(180deg, rgba(241, 249, 249, 0.8), rgba(255, 255, 255, 0.74));
+}
+
 .bike-name {
   font-size: 1.55rem;
 }
@@ -528,18 +532,75 @@ label,
   background: linear-gradient(180deg, rgba(255, 247, 235, 0.94), rgba(255, 250, 242, 0.92));
 }
 
+.wheelset-block {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 244, 230, 0.84), rgba(255, 249, 242, 0.9));
+  border: 1px solid rgba(221, 106, 31, 0.1);
+}
+
+.wheelset-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(28, 23, 19, 0.06);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.status-badge.is-active {
+  background: rgba(29, 109, 116, 0.12);
+  color: var(--teal);
+}
+
 .wheelset-specs {
   display: grid;
   gap: 6px;
   padding: 12px 14px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.58);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .wheelset-specs p,
 .priority-item p,
 .activity-item p {
   margin: 0;
+}
+
+.spec-row {
+  display: grid;
+  gap: 2px;
+}
+
+.spec-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.spec-value {
+  color: var(--panel-ink);
+  font-weight: 700;
+}
+
+.wheelset-meter-stack .meter-card {
+  background: linear-gradient(180deg, rgba(255, 251, 246, 0.92), rgba(255, 255, 255, 0.76));
 }
 
 .meter-card {
@@ -558,6 +619,7 @@ label,
 .meter-detail {
   margin: 6px 0 0;
   font-size: 0.96rem;
+  color: #5e574e;
 }
 
 .meter-state {
@@ -631,6 +693,27 @@ label,
   border-radius: 20px;
   background: rgba(255, 251, 246, 0.66);
   border: 1px dashed rgba(28, 23, 19, 0.12);
+}
+
+.activity-item {
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(255, 251, 246, 0.94), rgba(255, 247, 238, 0.92));
+}
+
+.activity-title {
+  font-size: 1.02rem;
+  line-height: 1.2;
+}
+
+.activity-meta {
+  margin-top: 4px;
+  font-size: 0.95rem;
+}
+
+.activity-note {
+  color: var(--panel-ink);
+  font-size: 0.98rem;
+  line-height: 1.45;
 }
 
 .hidden {

@@ -421,19 +421,23 @@ function renderBikes() {
   const wheelsetList = fragment.querySelector(".wheelset-list");
   orderedWheelsets(bike).forEach((wheelset) => {
     const wheelsetFragment = templates.wheelset.content.cloneNode(true);
+    const isActive = bike.activeWheelsetId === wheelset.id;
     wheelsetFragment.querySelector(".wheelset-name").textContent = wheelset.name;
+    const wheelsetStatus = wheelsetFragment.querySelector(".wheelset-status");
+    wheelsetStatus.textContent = isActive ? "Active" : "Stored";
+    wheelsetStatus.classList.toggle("is-active", isActive);
     wheelsetFragment.querySelector(".wheelset-meta").textContent =
-      `${wheelset.notes || "No notes"} • ${formatDistance(wheelset.distance)} • ${bike.activeWheelsetId === wheelset.id ? "Active setup" : "Stored setup"}`;
+      `${formatDistance(wheelset.distance)} on this setup • ${wheelset.notes || "No notes added yet"}`;
     wheelsetFragment.querySelector(".wheelset-specs").innerHTML = `
-      <p><strong>Front tyre:</strong> ${wheelset.components.frontTyre || "Not set"}</p>
-      <p><strong>Rear tyre:</strong> ${wheelset.components.rearTyre || "Not set"}</p>
-      <p><strong>Front sealant:</strong> ${wheelset.components.frontSealant || "Not set"}</p>
-      <p><strong>Rear sealant:</strong> ${wheelset.components.rearSealant || "Not set"}</p>
+      <div class="spec-row"><span class="spec-label">Front tyre</span><span class="spec-value">${wheelset.components.frontTyre || "Not set"}</span></div>
+      <div class="spec-row"><span class="spec-label">Rear tyre</span><span class="spec-value">${wheelset.components.rearTyre || "Not set"}</span></div>
+      <div class="spec-row"><span class="spec-label">Front sealant</span><span class="spec-value">${wheelset.components.frontSealant || "Not set"}</span></div>
+      <div class="spec-row"><span class="spec-label">Rear sealant</span><span class="spec-value">${wheelset.components.rearSealant || "Not set"}</span></div>
     `;
 
     const activateButton = wheelsetFragment.querySelector(".activate-wheelset");
-    activateButton.textContent = bike.activeWheelsetId === wheelset.id ? "Active" : "Set active";
-    activateButton.disabled = bike.activeWheelsetId === wheelset.id;
+    activateButton.textContent = isActive ? "Active" : "Set active";
+    activateButton.disabled = isActive;
     activateButton.addEventListener("click", () => {
       bike.activeWheelsetId = wheelset.id;
       persist();
@@ -473,7 +477,7 @@ function renderActivity() {
         </div>
         <button class="danger-link delete-activity" type="button">Delete</button>
       </div>
-      <p>${item.notes || "No notes recorded."}</p>
+      <p class="activity-note">${item.notes || "No notes recorded."}</p>
     `;
     article.querySelector(".delete-activity").addEventListener("click", () => deleteActivity(item.id));
     elements.activityList.appendChild(article);
