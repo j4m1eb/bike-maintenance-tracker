@@ -32,6 +32,7 @@ const elements = {
   bikeForm: document.querySelector("#bike-form"),
   wheelsetForm: document.querySelector("#wheelset-form"),
   serviceForm: document.querySelector("#service-form"),
+  bikeTabs: document.querySelector("#bike-tabs"),
   bikeList: document.querySelector("#bike-list"),
   statsGrid: document.querySelector("#stats-grid"),
   priorityList: document.querySelector("#priority-list"),
@@ -184,7 +185,7 @@ function parseState(raw) {
 }
 
 function defaultOnboarding() {
-  return { stravaConnected: false, showManualSetup: false, importedKeys: [], setupTab: "bike" };
+  return { stravaConnected: false, showManualSetup: false, importedKeys: [], setupTab: "bike", selectedBikeId: "" };
 }
 
 function persist() {
@@ -236,6 +237,7 @@ function onBikeSubmit(event) {
   const bike = createBikeFromForm(new FormData(event.currentTarget));
   state.bikes.unshift(bike);
   state.onboarding.showManualSetup = true;
+  state.onboarding.selectedBikeId = bike.id;
   state.activity.unshift(activityRecord(bike, bike.wheelsets[0], "setup", bike.distance, `${bike.category} bike created`));
   event.currentTarget.reset();
   persist();
@@ -249,6 +251,7 @@ function onWheelsetSubmit(event) {
   if (!bike) return;
   const wheelset = createWheelsetFromForm(form);
   bike.wheelsets.unshift(wheelset);
+  state.onboarding.selectedBikeId = bike.id;
   if (!bike.activeWheelsetId) bike.activeWheelsetId = wheelset.id;
   state.activity.unshift(activityRecord(bike, wheelset, "wheelset", wheelset.distance, wheelset.notes || "Wheelset added"));
   event.currentTarget.reset();
@@ -396,59 +399,61 @@ function renderPriority() {
 }
 
 function renderBikes() {
+  renderBikeTabs();
   elements.bikeList.innerHTML = "";
   if (!state.bikes.length) {
     elements.bikeList.innerHTML = `<div class="empty-state">No bikes yet. Import bikes from Strava or add one manually.</div>`;
     return;
   }
 
-  state.bikes.forEach((bike) => {
-    const fragment = templates.bikeCard.content.cloneNode(true);
-    fragment.querySelector(".bike-name").textContent = bike.name;
-    fragment.querySelector(".bike-meta").textContent = `${bike.category} • ${formatDistance(bike.distance)} total • ${bike.wheelsets.length} wheelset${bike.wheelsets.length === 1 ? "" : "s"}`;
-    fragment.querySelector(".delete-bike").addEventListener("click", () => deleteBike(bike.id));
-    fragment.querySelector(".edit-bike").addEventListener("click", () => editBike(bike.id));
+  const bike = selectedBike();
+  if (!bike) return;
 
-    const bikeStack = fragment.querySelector(".bike-meter-stack");
-    BIKE_CONSUMABLES.forEach((item) => {
-      bikeStack.appendChild(createMeter(item, bike.distance, bike.maintenance[item.key], bike.thresholds[item.key]));
-    });
+  const fragment = templates.bikeCard.content.cloneNode(true);
+  fragment.querySelector(".bike-name").textContent = bike.name;
+  fragment.querySelector(".bike-meta").textContent = `${bike.category} • ${formatDistance(bike.distance)} total • ${bike.wheelsets.length} wheelset${bike.wheelsets.length === 1 ? "" : "s"}`;
+  fragment.querySelector(".delete-bike").addEventListener("click", () => deleteBike(bike.id));
+  fragment.querySelector(".edit-bike").addEventListener("click", () => editBike(bike.id));
 
-    const wheelsetList = fragment.querySelector(".wheelset-list");
-    orderedWheelsets(bike).forEach((wheelset) => {
-      const wheelsetFragment = templates.wheelset.content.cloneNode(true);
-      wheelsetFragment.querySelector(".wheelset-name").textContent = wheelset.name;
-      wheelsetFragment.querySelector(".wheelset-meta").textContent =
-        `${wheelset.notes || "No notes"} • ${formatDistance(wheelset.distance)} • ${bike.activeWheelsetId === wheelset.id ? "Active setup" : "Stored setup"}`;
-      wheelsetFragment.querySelector(".wheelset-specs").innerHTML = `
-        <p><strong>Front tyre:</strong> ${wheelset.components.frontTyre || "Not set"}</p>
-        <p><strong>Rear tyre:</strong> ${wheelset.components.rearTyre || "Not set"}</p>
-        <p><strong>Front sealant:</strong> ${wheelset.components.frontSealant || "Not set"}</p>
-        <p><strong>Rear sealant:</strong> ${wheelset.components.rearSealant || "Not set"}</p>
-      `;
-
-      const activateButton = wheelsetFragment.querySelector(".activate-wheelset");
-      activateButton.textContent = bike.activeWheelsetId === wheelset.id ? "Active" : "Set active";
-      activateButton.disabled = bike.activeWheelsetId === wheelset.id;
-      activateButton.addEventListener("click", () => {
-        bike.activeWheelsetId = wheelset.id;
-        persist();
-        render();
-      });
-
-      wheelsetFragment.querySelector(".edit-wheelset").addEventListener("click", () => editWheelset(bike.id, wheelset.id));
-      wheelsetFragment.querySelector(".delete-wheelset").addEventListener("click", () => deleteWheelset(bike.id, wheelset.id));
-
-      const meterStack = wheelsetFragment.querySelector(".wheelset-meter-stack");
-      WHEELSET_CONSUMABLES.forEach((item) => {
-        meterStack.appendChild(createMeter(item, wheelset.distance, wheelset.maintenance[item.key], wheelset.thresholds[item.key]));
-      });
-
-      wheelsetList.appendChild(wheelsetFragment);
-    });
-
-    elements.bikeList.appendChild(fragment);
+  const bikeStack = fragment.querySelector(".bike-meter-stack");
+  BIKE_CONSUMABLES.forEach((item) => {
+    bikeStack.appendChild(createMeter(item, bike.distance, bike.maintenance[item.key], bike.thresholds[item.key]));
   });
+
+  const wheelsetList = fragment.querySelector(".wheelset-list");
+  orderedWheelsets(bike).forEach((wheelset) => {
+    const wheelsetFragment = templates.wheelset.content.cloneNode(true);
+    wheelsetFragment.querySelector(".wheelset-name").textContent = wheelset.name;
+    wheelsetFragment.querySelector(".wheelset-meta").textContent =
+      `${wheelset.notes || "No notes"} • ${formatDistance(wheelset.distance)} • ${bike.activeWheelsetId === wheelset.id ? "Active setup" : "Stored setup"}`;
+    wheelsetFragment.querySelector(".wheelset-specs").innerHTML = `
+      <p><strong>Front tyre:</strong> ${wheelset.components.frontTyre || "Not set"}</p>
+      <p><strong>Rear tyre:</strong> ${wheelset.components.rearTyre || "Not set"}</p>
+      <p><strong>Front sealant:</strong> ${wheelset.components.frontSealant || "Not set"}</p>
+      <p><strong>Rear sealant:</strong> ${wheelset.components.rearSealant || "Not set"}</p>
+    `;
+
+    const activateButton = wheelsetFragment.querySelector(".activate-wheelset");
+    activateButton.textContent = bike.activeWheelsetId === wheelset.id ? "Active" : "Set active";
+    activateButton.disabled = bike.activeWheelsetId === wheelset.id;
+    activateButton.addEventListener("click", () => {
+      bike.activeWheelsetId = wheelset.id;
+      persist();
+      render();
+    });
+
+    wheelsetFragment.querySelector(".edit-wheelset").addEventListener("click", () => editWheelset(bike.id, wheelset.id));
+    wheelsetFragment.querySelector(".delete-wheelset").addEventListener("click", () => deleteWheelset(bike.id, wheelset.id));
+
+    const meterStack = wheelsetFragment.querySelector(".wheelset-meter-stack");
+    WHEELSET_CONSUMABLES.forEach((item) => {
+      meterStack.appendChild(createMeter(item, wheelset.distance, wheelset.maintenance[item.key], wheelset.thresholds[item.key]));
+    });
+
+    wheelsetList.appendChild(wheelsetFragment);
+  });
+
+  elements.bikeList.appendChild(fragment);
 }
 
 function renderActivity() {
@@ -494,7 +499,11 @@ function renderBikeSelects() {
       option.textContent = bike.name;
       select.appendChild(option);
     });
-    if (state.bikes.some((bike) => bike.id === current)) select.value = current;
+    if (state.bikes.some((bike) => bike.id === current)) {
+      select.value = current;
+    } else if (state.bikes.some((bike) => bike.id === state.onboarding.selectedBikeId)) {
+      select.value = state.onboarding.selectedBikeId;
+    }
   });
 }
 
@@ -536,7 +545,7 @@ function importSelectedStravaBikes() {
     return;
   }
 
-  imported.forEach((item) => {
+  imported.forEach((item, index) => {
     const bike = createBike({
       name: item.name,
       category: item.category,
@@ -561,6 +570,7 @@ function importSelectedStravaBikes() {
       rearBrakePadsInterval: 2200
     });
     state.bikes.unshift(bike);
+    if (index === 0) state.onboarding.selectedBikeId = bike.id;
     state.activity.unshift(activityRecord(bike, bike.wheelsets[0], "setup", bike.distance, "Imported from Strava stub"));
   });
 
@@ -586,6 +596,9 @@ function deleteBike(bikeId) {
   if (!confirm("Delete this bike and all of its wheelsets and service history?")) return;
   state.bikes = state.bikes.filter((bike) => bike.id !== bikeId);
   state.activity = state.activity.filter((item) => item.bikeId !== bikeId);
+  if (state.onboarding.selectedBikeId === bikeId) {
+    state.onboarding.selectedBikeId = state.bikes[0]?.id || "";
+  }
   persist();
   render();
 }
@@ -693,7 +706,7 @@ function exportState() {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "chainkeeper-data.json";
+  link.download = "ride-ready-data.json";
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -725,6 +738,7 @@ function seedDemoData() {
   state.onboarding = structuredClone(demoState.onboarding);
   state.bikes = structuredClone(demoState.bikes);
   state.activity = structuredClone(demoState.activity);
+  state.onboarding.selectedBikeId = state.bikes[0]?.id || "";
   persist();
   render();
 }
@@ -733,6 +747,9 @@ function normalizeState() {
   state.units = state.units === "mi" ? "mi" : "km";
   state.onboarding = { ...defaultOnboarding(), ...(state.onboarding || {}) };
   state.bikes = (state.bikes || []).map((bike) => normalizeBike(bike));
+  if (!state.onboarding.selectedBikeId || !state.bikes.some((bike) => bike.id === state.onboarding.selectedBikeId)) {
+    state.onboarding.selectedBikeId = state.bikes[0]?.id || "";
+  }
   state.activity = (state.activity || []).map((item) => ({
     id: item.id || crypto.randomUUID(),
     wheelsetId: "",
@@ -925,6 +942,10 @@ function getBike(id) {
   return state.bikes.find((bike) => bike.id === id);
 }
 
+function selectedBike() {
+  return getBike(state.onboarding.selectedBikeId) || state.bikes[0] || null;
+}
+
 function getWheelset(bike, id) {
   return bike.wheelsets.find((wheelset) => wheelset.id === id);
 }
@@ -934,6 +955,29 @@ function orderedWheelsets(bike) {
     if (a.id === bike.activeWheelsetId) return -1;
     if (b.id === bike.activeWheelsetId) return 1;
     return 0;
+  });
+}
+
+function renderBikeTabs() {
+  elements.bikeTabs.innerHTML = "";
+  if (!state.bikes.length) {
+    elements.bikeTabs.classList.add("hidden");
+    return;
+  }
+
+  elements.bikeTabs.classList.remove("hidden");
+  state.bikes.forEach((bike) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "segment";
+    if (bike.id === state.onboarding.selectedBikeId) button.classList.add("is-active");
+    button.textContent = bike.name;
+    button.addEventListener("click", () => {
+      state.onboarding.selectedBikeId = bike.id;
+      persist();
+      render();
+    });
+    elements.bikeTabs.appendChild(button);
   });
 }
 

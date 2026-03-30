@@ -121,46 +121,12 @@
               <h2>Your bikes</h2>
             </div>
           </div>
+          <div class="garage-tabs" id="bike-tabs"></div>
           <div class="bike-list" id="bike-list"></div>
         </section>
       </section>
 
       <aside class="sidebar">
-        <section class="panel hidden">
-          <div class="panel-header">
-            <div>
-              <p class="eyebrow">Manage</p>
-              <h2>Quick actions</h2>
-            </div>
-          </div>
-          <div class="quick-button-row">
-            <button class="ghost-button" id="quick-new-chain" type="button">New chain fitted</button>
-            <button class="ghost-button" id="quick-wax-chain" type="button">Chain waxed</button>
-          </div>
-          <form id="service-form" class="stack-form">
-            <label>Bike<select name="bikeId" id="service-bike-select" required></select></label>
-            <label>Action
-              <select name="type" id="service-type-select">
-                <option value="wax">Waxed chain</option>
-                <option value="newChain">New chain fitted</option>
-                <option value="chainring">Replaced chainrings</option>
-                <option value="cassette">Replaced cassette</option>
-                <option value="frontBrakePads">Replaced front brake pads</option>
-                <option value="rearBrakePads">Replaced rear brake pads</option>
-                <option value="frontTyre">Replaced front tyre</option>
-                <option value="rearTyre">Replaced rear tyre</option>
-                <option value="frontSealant">Refreshed front sealant</option>
-                <option value="rearSealant">Refreshed rear sealant</option>
-                <option value="ride">Added ride distance</option>
-              </select>
-            </label>
-            <label id="service-wheelset-label">Wheelset<select name="wheelsetId" id="service-wheelset-select"></select></label>
-            <label>Distance<input name="distance" type="number" min="0" step="1" value="0" required></label>
-            <label>Notes<textarea name="notes" rows="3" placeholder="Silca hot wax, rear tyre replaced, sealant top-up..."></textarea></label>
-            <button class="primary-button" type="submit">Save event</button>
-          </form>
-        </section>
-
         <section class="panel" id="manual-setup-panel">
           <div class="panel-header">
             <div>

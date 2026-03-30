@@ -230,6 +230,7 @@ label,
 
 .imported-bike-list,
 .bike-list,
+.garage-tabs,
 .wheelset-list,
 .meter-stack,
 .activity-list,
@@ -341,6 +342,11 @@ label,
 .priority-item {
   display: grid;
   gap: 6px;
+}
+
+.garage-tabs {
+  grid-template-columns: repeat(auto-fit, minmax(120px, max-content));
+  margin-bottom: 6px;
 }
 
 .priority-item.is-due-now {
