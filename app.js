@@ -40,7 +40,6 @@ const elements = {
   activityList: document.querySelector("#activity-list"),
   importedBikeList: document.querySelector("#imported-bike-list"),
   importSelectedBikes: document.querySelector("#import-selected-bikes"),
-  quickNewChain: document.querySelector("#quick-new-chain"),
   quickWaxChain: document.querySelector("#quick-wax-chain"),
   showBikeTab: document.querySelector("#show-bike-tab"),
   showWheelsetTab: document.querySelector("#show-wheelset-tab"),
@@ -202,7 +201,6 @@ function bindEvents() {
   elements.closeEditor.addEventListener("click", closeEditor);
   elements.bikeEditForm.addEventListener("submit", onBikeEditSubmit);
   elements.wheelsetEditForm.addEventListener("submit", onWheelsetEditSubmit);
-  elements.quickNewChain.addEventListener("click", () => quickServiceAction("newChain"));
   elements.quickWaxChain.addEventListener("click", () => quickServiceAction("wax"));
   elements.showBikeTab.addEventListener("click", () => setSetupTab("bike"));
   elements.showWheelsetTab.addEventListener("click", () => setSetupTab("wheelset"));
