@@ -1,6 +1,6 @@
-# Chainkeeper
+# Ride Ready
 
-Chainkeeper is a local-first web prototype for tracking:
+Ride Ready is a local-first web prototype for tracking:
 
 - chain waxing intervals
 - wheelset-specific front and rear tyre service life
