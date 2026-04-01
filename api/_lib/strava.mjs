@@ -60,9 +60,9 @@ function appendSetCookie(res, cookie) {
   res.setHeader("Set-Cookie", [current, cookie]);
 }
 
-function cookieBase(maxAgeSeconds) {
+function cookieBase(maxAgeSeconds, sameSite = "Lax") {
   const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
-  return `Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAgeSeconds}${secure}`;
+  return `Path=/; HttpOnly; SameSite=${sameSite}; Max-Age=${maxAgeSeconds}${secure}`;
 }
 
 export function setAuthCookie(res, payload) {
@@ -79,7 +79,9 @@ export function clearAuthCookie(res) {
 export function setOauthCookie(res, state) {
   const { SESSION_SECRET } = env();
   const value = encodeSigned({ state }, SESSION_SECRET);
-  appendSetCookie(res, `${COOKIE_OAUTH}=${encodeURIComponent(value)}; ${cookieBase(60 * 10)}`);
+  // OAuth returns from Strava as a cross-site navigation on the live domain.
+  // SameSite=None keeps the state cookie available for the callback.
+  appendSetCookie(res, `${COOKIE_OAUTH}=${encodeURIComponent(value)}; ${cookieBase(60 * 10, "None")}`);
 }
 
 export function clearOauthCookie(res) {
