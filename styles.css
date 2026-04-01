@@ -774,6 +774,7 @@ label,
 .dense-form .primary-button,
 .dense-form .ghost-button,
 .dense-form .file-button,
+.dense-form .full-span,
 .dense-form label:has(textarea),
 .dense-form label:last-of-type {
   grid-column: 1 / -1;
