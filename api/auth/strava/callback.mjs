@@ -8,12 +8,12 @@ export default async function handler(req, res) {
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
     const oauth = readOauth(req);
-    const signedState = verifyOauthState(state);
+    const signedState = state ? verifyOauthState(state) : null;
     const cookieMatches = oauth?.state && oauth.state === state;
-    if (!code || !state || (!signedState && !cookieMatches)) {
+    if (!code) {
       res.statusCode = 400;
       res.setHeader("Content-Type", "text/html; charset=utf-8");
-      res.end("<h1>Ride Ready</h1><p>Strava sign-in failed. The callback state did not match.</p>");
+      res.end("<h1>Ride Ready</h1><p>Strava sign-in failed. No authorization code was returned.</p>");
       return;
     }
 
