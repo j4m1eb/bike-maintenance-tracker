@@ -386,10 +386,14 @@ function renderOnboarding() {
     elements.stravaStatus.textContent = backend.lastSyncAt
       ? `Strava connected • last sync ${new Date(backend.lastSyncAt).toLocaleString()}`
       : "Strava connected";
-    elements.connectStrava.textContent = "Sync Strava";
+    elements.connectStrava.innerHTML = "Sync Strava";
+    elements.connectStrava.classList.remove("strava-connect-button");
+    elements.connectStrava.classList.add("primary-button");
     elements.showManualSetup.textContent = "Bike setup";
   } else {
-    elements.connectStrava.textContent = "Connect Strava";
+    elements.connectStrava.innerHTML = '<img src="./btn_strava_connect_with_orange_x2.png" alt="Connect with Strava">';
+    elements.connectStrava.classList.add("strava-connect-button");
+    elements.connectStrava.classList.remove("primary-button");
     elements.showManualSetup.textContent = "Skip Strava for now";
   }
   elements.toggleStravaManage.classList.toggle("hidden", !showCompactConnectedState);
