@@ -415,10 +415,10 @@ label,
 
 .strava-powered-mark {
   display: block;
-  height: 20px;
+  height: 18px;
   width: auto;
-  margin: 2px 0 10px;
-  opacity: 0.88;
+  margin: 6px 0 6px;
+  opacity: 0.92;
 }
 
 .status-dot {
